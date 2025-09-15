@@ -4,42 +4,30 @@ using UnityEngine;
 
 public class tiroBullet : MonoBehaviour
 {
-    [SerializeField] public GameObject bulletPrefab;
-    [SerializeField] public Transform bulletSpawn;
-    [SerializeField] public float bulletVida = 2.0f;
-    [SerializeField] public float bulletSpeed = 6.0f;
+   [SerializeField] private GameObject bulletPrefab;
+    [SerializeField] private Transform bulletSpawn;
+    [SerializeField] private float bulletLifetime = 2.0f;
+    [SerializeField] private float bulletSpeed = 10.0f;
+    [SerializeField] private float fireCooldown = 0.5f;
 
-    private float currentTime = 0.0f;
-    public float ataqueTime = 2.0f;
+    private float fireTimer = 0f;
 
     void Update()
     {
-        if (currentTime <= ataqueTime)
-        {
-            currentTime = currentTime + Time.deltaTime;
-            Debug.Log(currentTime);
-        }
-    }
+        fireTimer += Time.deltaTime;
 
-    void FixedUpdate()
-    {
-        
-        if ( ( Input.GetKey(KeyCode.Mouse0 ) ) && ( currentTime >= ataqueTime ) )
+        if (Input.GetMouseButton(0) && fireTimer >= fireCooldown)
         {
             Fire();
-            currentTime = 0;                        
+            fireTimer = 0f;
         }
     }
 
     void Fire()
     {
-        // Cria um Bullet a partir de BulletPrefab
-        var bullet = (GameObject)Instantiate(bulletPrefab, bulletSpawn.position, bulletSpawn.rotation);
-
-        // Adiciona velocidade a Bullet
-        bullet.GetComponent<Rigidbody>().linearVelocity = bullet.transform.forward * bulletSpeed;
-
-        // Destruir Bullet depois de n segundos
-        Destroy(bullet, bulletVida);
+        GameObject bullet = Instantiate(bulletPrefab, bulletSpawn.position, bulletSpawn.rotation);
+        Rigidbody rb = bullet.GetComponent<Rigidbody>();
+        rb.linearVelocity = bullet.transform.forward * bulletSpeed;
+        Destroy(bullet, bulletLifetime);
     }
 }
