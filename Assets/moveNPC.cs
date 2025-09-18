@@ -8,63 +8,91 @@ using UnityEngine.AI;
 
 public class moveNPC : MonoBehaviour
 {
-    public float visao = 15.0f;
-    public float tiro = 10.0f;
-    public Transform alvo;
-    private NavMeshAgent agente;
-    private Boolean atirar = false;
+    [Header("Componentes")]
+    public NavMeshAgent agente;
+    public Transform player;
+    public GameObject bulletPrefab;
+    public Transform bulletSpawn;
 
-    // Start is called before the first frame update
+    [Header("Status")]
+    public float vida = 100f;
+    public float danoTiro = 10f;
+    public float velocidadeBala = 10f;
+    public float tempoEntreTiros = 1.5f;
+
+    private bool playerNaVisao = false;
+    private bool playerNoAlcance = false;
+    private float tempoTiroAtual = 0f;
+
     void Start()
     {
-        agente = GetComponent<NavMeshAgent>();
+        if (agente == null)
+            agente = GetComponent<NavMeshAgent>();
+
+        player = GameObject.FindGameObjectWithTag("Player").transform;
     }
 
-    // Update is called once per frame
     void Update()
     {
-        if (Vector3.Distance(transform.position, alvo.position) <= visao)
+        tempoTiroAtual += Time.deltaTime;
+
+        // Perseguir player se estiver na visão
+        if (playerNaVisao && !playerNoAlcance)
         {
             agente.isStopped = false;
-            agente.SetDestination(alvo.position);
+            agente.SetDestination(player.position);
+        }
+        // Parar para atirar se estiver perto
+        else if (playerNoAlcance)
+        {
+            agente.isStopped = true;
+
+            // Olhar para o player
+            Vector3 lookDir = player.position - transform.position;
+            lookDir.y = 0; // não rotaciona no eixo Y
+            transform.rotation = Quaternion.LookRotation(lookDir);
+
+            if (tempoTiroAtual >= tempoEntreTiros)
+            {
+                Atirar();
+                tempoTiroAtual = 0f;
+            }
         }
         else
         {
             agente.isStopped = true;
         }
+    }
 
+    public void Atirar()
+    {
+        GameObject bullet = Instantiate(bulletPrefab, bulletSpawn.position, bulletSpawn.rotation);
+        Rigidbody rb = bullet.GetComponent<Rigidbody>();
+        rb.linearVelocity = bullet.transform.forward * velocidadeBala;
+        Destroy(bullet, 3f);
+    }
 
-        if (Vector3.Distance(transform.position, alvo.position) <= tiro)
+    public void LevarDano(float dano)
+    {
+        vida -= dano;
+        if (vida <= 0)
         {
-            atirar = true;
-        }
-        else
-        {
-            atirar = false;
+            Morrer();
         }
     }
 
-    void FixedUpdate()
+    private void Morrer()
     {
-        if (atirar)
-        {
-            atirando();
-        }
+        Destroy(gameObject);
     }
 
-    public void atirando()
+    public void SetVisao(bool status)
     {
-        
+        playerNaVisao = status;
     }
 
-    private void OnTriggerEnter(Collider other)
+    public void SetAtaque(bool status)
     {
-        agente.isStopped = false;
-        agente.SetDestination(alvo.position);
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        agente.isStopped = true;
+        playerNoAlcance = status;
     }
 }
