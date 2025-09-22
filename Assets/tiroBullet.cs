@@ -28,6 +28,10 @@ public class tiroBullet : MonoBehaviour
         GameObject bullet = Instantiate(bulletPrefab, bulletSpawn.position, bulletSpawn.rotation);
         Rigidbody rb = bullet.GetComponent<Rigidbody>();
         rb.linearVelocity = bullet.transform.forward * bulletSpeed;
+
+        // Define quem atirou
+        bullet.GetComponent<bulletScript>().dono = "Player";
+
         Destroy(bullet, bulletLifetime);
     }
 }
