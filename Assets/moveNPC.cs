@@ -75,6 +75,7 @@ public class moveNPC : MonoBehaviour
     public void LevarDano(float dano)
     {
         vida -= dano;
+        Debug.Log("Vida do Inimigo: " + vida);
         if (vida <= 0)
         {
             Morrer();

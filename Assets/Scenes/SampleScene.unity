@@ -340,7 +340,7 @@ GameObject:
   - component: {fileID: 290861678}
   m_Layer: 0
   m_Name: Inimigo
-  m_TagString: Untagged
+  m_TagString: Inimigo
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -471,10 +471,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 404cb25417e0ac547b5388902987e7b5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  agente: {fileID: 0}
-  player: {fileID: 0}
-  bulletPrefab: {fileID: 0}
-  bulletSpawn: {fileID: 0}
+  agente: {fileID: 290861673}
+  player: {fileID: 1667308857}
+  bulletPrefab: {fileID: 3945172722271969166, guid: 78a43eeb82acac746a86cefac217210c, type: 3}
+  bulletSpawn: {fileID: 1501629715}
   vida: 100
   danoTiro: 10
   velocidadeBala: 10
@@ -768,7 +768,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0.29, z: 0.8}
   m_LocalScale: {x: 0.2, y: 0.5, z: 0.20000002}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1501629715}
   m_Father: {fileID: 290861677}
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
 --- !u!136 &431875271
@@ -1219,6 +1220,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1094880278}
   - component: {fileID: 1094880279}
+  - component: {fileID: 1094880280}
   m_Layer: 0
   m_Name: Ataque
   m_TagString: Untagged
@@ -1262,6 +1264,18 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 4
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1094880280
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1094880277}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6450c8970dc2195449cb4f243c3e226c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1487846833
 GameObject:
   m_ObjectHideFlags: 0
@@ -1435,6 +1449,37 @@ Transform:
   - {fileID: 330585546}
   - {fileID: 1651910277}
   m_Father: {fileID: 1667308857}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1501629714
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1501629715}
+  m_Layer: 0
+  m_Name: Tiro
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1501629715
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1501629714}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.7071068, y: -0, z: -0, w: 0.7071068}
+  m_LocalPosition: {x: 0, y: 1.149, z: -0}
+  m_LocalScale: {x: 5, y: 5, z: 2}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 431875270}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1507473200
 GameObject:
@@ -1734,7 +1779,7 @@ GameObject:
   - component: {fileID: 1667308860}
   m_Layer: 0
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1754,6 +1799,7 @@ MonoBehaviour:
   speed: 5
   cameraTransform: {fileID: 1492249626}
   mouseSensitivity: 10
+  vidaMaxima: 100
 --- !u!136 &1667308854
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -1922,6 +1968,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1879062671}
   - component: {fileID: 1879062672}
+  - component: {fileID: 1879062673}
   m_Layer: 0
   m_Name: Visao
   m_TagString: Untagged
@@ -1965,6 +2012,18 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 7
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1879062673
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1879062670}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ebb492480ae9e834e8a24d68b6dcf7e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &2061169292836967627
 PrefabInstance:
   m_ObjectHideFlags: 0
