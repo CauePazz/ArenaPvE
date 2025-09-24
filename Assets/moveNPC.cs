@@ -8,103 +8,99 @@ public class moveNPC : MonoBehaviour
     public NavMeshAgent agente;
     public Transform player;
     public GameObject bulletPrefab;
-    public Transform bulletSpawn;
 
     [Header("Status")]
     public float vida = 100f;
-    public float danoTiro = 10f;
-    public float velocidadeBala = 10f;
+
+    [Header("Ataque")]
     public float tempoEntreTiros = 1.5f;
+    public Transform bulletSpawn;
+    public float forcaTiro = 32f;
+    public float forcaVertical = 8f;
+    private bool jaAtirou;
 
-    [Header("Patrulha Aleatória")]
-    public float raioPatrulha = 10f;
-    public Transform centroPatrulha;
+    [Header("Ranges")]
+    public float rangeVisao = 10f;
+    public float rangeAtaque = 5f;
+    public LayerMask layerPlayer;
 
-    private float tempoTiroAtual = 0f;
-    private bool playerNaVisao = false;
-    private bool playerNoAlcance = false;
+    [Header("Patrulha")]
+    public float raioPatrulha = 15f;
+    public Transform centroPatrulha; // pode ser o próprio transform
+    private bool pontoSetado = false;
+    private Vector3 pontoDestino;
 
     void Start()
     {
         agente = GetComponent<NavMeshAgent>();
-        player = GameObject.FindGameObjectWithTag("Player").transform;
-
         if (centroPatrulha == null)
             centroPatrulha = transform;
 
-        SetNovoDestinoPatrulha();
+        player = GameObject.FindGameObjectWithTag("Player").transform;
     }
 
     void Update()
     {
-        tempoTiroAtual += Time.deltaTime;
+        bool playerNaVisao = Physics.CheckSphere(transform.position, rangeVisao, layerPlayer);
+        bool playerNoAlcance = Physics.CheckSphere(transform.position, rangeAtaque, layerPlayer);
 
-        // --- SE PLAYER ESTÁ NO ALCANCE PARA ATACAR ---
-        if (playerNoAlcance)
+        if (!playerNaVisao && !playerNoAlcance)
+            Patrulhar();
+        else if (playerNaVisao && !playerNoAlcance)
+            Perseguir();
+        else if (playerNoAlcance)
+            Atacar();
+    }
+
+    void Patrulhar()
+    {
+        if (!pontoSetado)
+            pontoSetado = GerarPontoAleatorio(centroPatrulha.position, raioPatrulha, out pontoDestino);
+
+        if (pontoSetado)
+            agente.SetDestination(pontoDestino);
+
+        if (!agente.pathPending && agente.remainingDistance < 1f)
+            pontoSetado = false;
+    }
+
+    void Perseguir()
+    {
+        agente.SetDestination(player.position);
+    }
+
+    void Atacar()
+    {
+        agente.SetDestination(transform.position); // para de se mover
+        transform.LookAt(player);
+
+        if (!jaAtirou)
         {
-            agente.isStopped = true;
+            Rigidbody rb = Instantiate(bulletPrefab, bulletSpawn.position, Quaternion.identity).GetComponent<Rigidbody>();
+            rb.AddForce(transform.forward * forcaTiro, ForceMode.Impulse);
+            rb.AddForce(transform.up * forcaVertical, ForceMode.Impulse);
 
-            Vector3 lookDir = player.position - transform.position;
-            lookDir.y = 0;
-            transform.rotation = Quaternion.LookRotation(lookDir);
-
-            if (tempoTiroAtual >= tempoEntreTiros)
-            {
-                Atirar();
-                tempoTiroAtual = 0f;
-            }
-        }
-        // --- SE PLAYER ESTÁ NA VISÃO MAS FORA DO ALCANCE ---
-        else if (playerNaVisao)
-        {
-            agente.isStopped = false;
-            agente.SetDestination(player.position);
-        }
-        // --- SENÃO, PATRULHA ---
-        else
-        {
-            agente.isStopped = false;
-
-            if (!agente.pathPending && agente.remainingDistance <= agente.stoppingDistance)
-                SetNovoDestinoPatrulha();
+            jaAtirou = true;
+            Invoke(nameof(ResetarTiro), tempoEntreTiros);
         }
     }
 
-    void SetNovoDestinoPatrulha()
+    void ResetarTiro()
     {
-        Vector3 ponto;
-        if (PontoAleatorio(centroPatrulha.position, raioPatrulha, out ponto))
-            agente.SetDestination(ponto);
+        jaAtirou = false;
     }
 
-    bool PontoAleatorio(Vector3 centro, float raio, out Vector3 resultado)
+    bool GerarPontoAleatorio(Vector3 centro, float raio, out Vector3 resultado)
     {
-        Vector3 pontoRand = centro + Random.insideUnitSphere * raio;
-        pontoRand.y = centro.y;
-
+        Vector3 pontoRandom = centro + Random.insideUnitSphere * raio;
         NavMeshHit hit;
-        if (NavMesh.SamplePosition(pontoRand, out hit, 2f, NavMesh.AllAreas))
+        if (NavMesh.SamplePosition(pontoRandom, out hit, 1.0f, NavMesh.AllAreas))
         {
             resultado = hit.position;
             return true;
         }
-
         resultado = Vector3.zero;
         return false;
-    }
-
-    public void Atirar()
-    {
-        GameObject bullet = Instantiate(bulletPrefab, bulletSpawn.position, bulletSpawn.rotation);
-        Collider bulletCol = bullet.GetComponent<Collider>();
-        Collider corpo = GetComponent<Collider>();
-        if (bulletCol && corpo) Physics.IgnoreCollision(bulletCol, corpo);
-
-        Rigidbody rb = bullet.GetComponent<Rigidbody>();
-        rb.linearVelocity = bullet.transform.forward * velocidadeBala;
-
-        bullet.GetComponent<bulletScript>().dono = "Inimigo";
-        Destroy(bullet, 3f);
     }
 
     public void LevarDano(float dano)
@@ -115,19 +111,21 @@ public class moveNPC : MonoBehaviour
 
     void Morrer()
     {
-        if (GameManager.instance != null)
-            GameManager.instance.RegistrarMorteInimigo();
-
         Destroy(gameObject);
     }
 
-    public void SetVisao(bool status) => playerNaVisao = status;
-    public void SetAtaque(bool status) => playerNoAlcance = status;
+    void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, rangeVisao);
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, rangeAtaque);
+    }
 
     public void AplicarDificuldade(float vidaBonus, float danoBonus, float velocidadeBonus)
     {
         vida += vidaBonus;
-        danoTiro += danoBonus;
+        
         agente.speed += velocidadeBonus;
     }
 }
