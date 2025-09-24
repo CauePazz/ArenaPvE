@@ -9,19 +9,15 @@ public class ataqueInimigo : MonoBehaviour
         enemy = GetComponentInParent<moveNPC>();
     }
 
-    void OnTriggerStay(Collider other)
+    private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player"))
-        {
             enemy.SetAtaque(true);
-        }
     }
 
-    void OnTriggerExit(Collider other)
+    private void OnTriggerExit(Collider other)
     {
         if (other.CompareTag("Player"))
-        {
             enemy.SetAtaque(false);
-        }
     }
 }
